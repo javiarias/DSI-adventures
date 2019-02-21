@@ -1,0 +1,68 @@
+﻿<Page
+    x:Class="Prueba_21FEB.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Prueba_21FEB"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+
+    <Grid>
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="wideState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800" />
+                    </VisualState.StateTriggers>
+                </VisualState>
+                <VisualState x:Name="narrowState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="inputButton.HorizontalAlignment" Value="Left"/>
+                        <Setter Target="inputButton.Margin" Value="10,5,0,5"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+                
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="5*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="0.3*"/>
+        </Grid.RowDefinitions>
+
+        <Border Background="LightSkyBlue" Margin="0,0,0,0"/>
+        <Border Grid.Column ="1" Background="DeepSkyBlue" Margin="0,0,0,0"/>
+        <Border Grid.Row="1" Grid.ColumnSpan="2" Background="MediumBlue" Margin="0,0,0,0"/>
+
+        <StackPanel Grid.Column="1" Margin="40,0,0,0" VerticalAlignment="Center">
+            <TextBlock x:Name="cityText" Foreground="White" FontSize="55" Text="" Margin="0,0,0,0"/>
+            <TextBlock Foreground="White" FontSize="55" Text="Today - 64° C" Margin="0,0,0,0"/>
+            <TextBlock Foreground="White" FontSize="55" Text="Partially Cloudy" Margin="0,0,0,0"/>
+            <TextBlock Foreground="White" FontSize="55" Text="Precipitation: 25%" Margin="0,0,0,0"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="60" Margin="0,0,0,0" Width="745">
+            <TextBlock Foreground="White" FontSize="45" Text="High: 66°" Margin="0,0,20,0"/>
+            <TextBlock Foreground="White" FontSize="45" Text="Low: 43°" Margin="0,0,20,0"/>
+            <TextBlock Foreground="White" FontSize="45" Text="Feels like: 63º"/>
+        </StackPanel>
+
+        <TextBox x:Name="cityInput" Grid.Row="2" Grid.ColumnSpan="1" Margin="0,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextChanged="textChanged" KeyDown="makeVisible"/>
+
+        <Button x:Name="inputButton" Visibility="Collapsed" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" Width="120" HorizontalAlignment="Right" Height="50"  Content="Mapa" FontSize="20" Margin="0,5,10,5" VerticalAlignment="Center" Click="changeMap"/>
+
+        <Image Margin="20,20,20,20" Source="Assets/partially-cloudy.png"/>
+
+    </Grid>
+</Page>
