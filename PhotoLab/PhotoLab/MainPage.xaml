@@ -29,17 +29,142 @@
       xmlns:local="using:PhotoLab"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:telerikInput="using:Telerik.UI.Xaml.Controls.Input"
       mc:Ignorable="d"
       NavigationCacheMode="Enabled">
 
     <Page.Resources>
 
         <!-- Add the DataTemplate and style Setters here -->
+        <DataTemplate x:Key="ImageGridView_DefaultItemTemplate">
+            <Grid Height="300"
+                  Width="300"
+                  Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Image x:Name="ItemImage"
+                       Source="Assets/StoreLogo.png"
+                       Stretch="Uniform" />
+                <StackPanel Orientation="Vertical"
+                            Grid.Row="1">
+                    <TextBlock Text="ImageTitle"
+                               HorizontalAlignment="Center"
+                               Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center">
+                        <TextBlock Text="ImageFileType"
+                                   HorizontalAlignment="Center"
+                                   Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock Text="ImageDimensions"
+                                   HorizontalAlignment="Center"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Margin="8,0,0,0" /> 
+                    </StackPanel>
+                    
+                    <telerikInput:RadRating Value="3"
+                                            IsReadOnly="True">
+                        <telerikInput:RadRating.FilledIconContentTemplate>
+                            <DataTemplate>
+                                <SymbolIcon Symbol="SolidStar"
+                                            Foreground="White" />
+                            </DataTemplate>
+                        </telerikInput:RadRating.FilledIconContentTemplate>
+                        <telerikInput:RadRating.EmptyIconContentTemplate>
+                            <DataTemplate>
+                                <SymbolIcon Symbol="OutlineStar"
+                                            Foreground="White" />
+                            </DataTemplate>
+                        </telerikInput:RadRating.EmptyIconContentTemplate>
+                    </telerikInput:RadRating>
+                </StackPanel>
+
+            </Grid>
+        </DataTemplate>
+        <Style x:Key="GridViewItemRevealStyle" TargetType="GridViewItem">
+            <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}"/>
+            <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}"/>
+            <Setter Property="Background" Value="Gray"/>
+            <Setter Property="Foreground" Value="{ThemeResource GridViewItemForeground}"/>
+            <Setter Property="TabNavigation" Value="Local"/>
+            <Setter Property="IsHoldingEnabled" Value="True"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="MinWidth" Value="{ThemeResource GridViewItemMinWidth}"/>
+            <Setter Property="MinHeight" Value="{ThemeResource GridViewItemMinHeight}"/>
+            <Setter Property="AllowDrop" Value="False"/>
+            <Setter Property="UseSystemFocusVisuals" Value="{StaticResource UseSystemFocusVisuals}"/>
+            <Setter Property="FocusVisualMargin" Value="-2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewItem">
+                        <ListViewItemPresenter x:Name="Root" CheckBrush="{ThemeResource GridViewItemCheckBrush}" ContentMargin="{TemplateBinding Padding}" CheckBoxBrush="{ThemeResource GridViewItemCheckBoxBrush}" ContentTransitions="{TemplateBinding ContentTransitions}" CheckMode="{ThemeResource GridViewItemCheckMode}" DragOpacity="{ThemeResource ListViewItemDragThemeOpacity}" DisabledOpacity="{ThemeResource ListViewItemDisabledThemeOpacity}" DragBackground="{ThemeResource GridViewItemDragBackground}" DragForeground="{ThemeResource GridViewItemDragForeground}" FocusBorderBrush="{ThemeResource GridViewItemFocusBorderBrush}" FocusVisualMargin="{TemplateBinding FocusVisualMargin}" FocusSecondaryBorderBrush="{ThemeResource GridViewItemFocusSecondaryBorderBrush}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" Control.IsTemplateFocusTarget="True" PressedBackground="{ThemeResource GridViewItemBackgroundPressed}" PlaceholderBackground="{ThemeResource GridViewItemPlaceholderBackground}" PointerOverForeground="{ThemeResource GridViewItemForegroundPointerOver}" PointerOverBackground="{ThemeResource GridViewItemBackgroundPointerOver}" RevealBorderThickness="{ThemeResource GridViewItemRevealBorderThemeThickness}" ReorderHintOffset="{ThemeResource GridViewItemReorderHintThemeOffset}" RevealBorderBrush="{ThemeResource GridViewItemRevealBorderBrush}" RevealBackground="{ThemeResource GridViewItemRevealBackground}" SelectedForeground="{ThemeResource GridViewItemForegroundSelected}" SelectionCheckMarkVisualEnabled="{ThemeResource GridViewItemSelectionCheckMarkVisualEnabled}" SelectedBackground="{ThemeResource GridViewItemBackgroundSelected}" SelectedPressedBackground="{ThemeResource GridViewItemBackgroundSelectedPressed}" SelectedPointerOverBackground="{ThemeResource GridViewItemBackgroundSelectedPointerOver}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="Selected"/>
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.(RevealBrush.State)" Value="PointerOver"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOverSelected">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.(RevealBrush.State)" Value="PointerOver"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOverPressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.(RevealBrush.State)" Value="Pressed"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.(RevealBrush.State)" Value="Pressed"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PressedSelected">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.(RevealBrush.State)" Value="Pressed"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="DisabledStates">
+                                    <VisualState x:Name="Enabled"/>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.RevealBorderThickness" Value="0"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </ListViewItemPresenter>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ImageGridView_DefaultItemContainerStyle" BasedOn="{StaticResource GridViewItemRevealStyle}" TargetType="GridViewItem"/>
+
+        <ItemsPanelTemplate x:Key="ImageGridView_ItemsPanelTemplatey">
+            <ItemsWrapGrid Orientation="Horizontal"
+                           HorizontalAlignment="Center"/>
+        </ItemsPanelTemplate>
     </Page.Resources>
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-        <!-- Add the TextBlock and GridView here -->
+    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         
-    </Grid>
+        <TextBlock x:Name="TitleTextBlock"
+            Text="Collection"  Margin="24,0,0,24" Style="{StaticResource TitleTextBlockStyle}"/>
+
+        <GridView ItemsPanel="{StaticResource ImageGridView_ItemsPanelTemplatey}" x:Name="ImageGridView"
+             Margin="0,0,0,8"
+             RelativePanel.AlignLeftWithPanel="True"
+             RelativePanel.AlignRightWithPanel="True"
+             RelativePanel.Below="TitleTextBlock"
+             ItemTemplate="{StaticResource ImageGridView_DefaultItemTemplate}"
+             ItemContainerStyle="{StaticResource ImageGridView_DefaultItemContainerStyle}"/>
+
+    </RelativePanel>
 </Page>
