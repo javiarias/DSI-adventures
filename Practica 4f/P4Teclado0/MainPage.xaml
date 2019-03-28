@@ -1,0 +1,114 @@
+﻿<Page
+    x:Class="P4Teclado.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:P4Teclado"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+
+        <DataTemplate x:Key="ListTemplate"
+                      x:DataType="local:Dron">
+            <Grid Height="30"
+                  Width="Auto">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="4*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock  Text="{x:Bind Id}"
+                            FontSize="{Binding FontSize, ElementName=page}"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource SubtitleTextBlockStyle}"
+                            Margin="10,0,0,0"
+                            Grid.Column="0"/>
+
+
+                <Image x:Name="ItemImage" 
+                        Source="{x:Bind Imagen}"
+                        VerticalAlignment="Center"
+                        Stretch="Fill"
+                        Margin="10,0,10,0"
+                        Grid.Column="1"/>
+
+                <TextBlock Text="{x:Bind Nombre}"
+                            FontSize="{Binding FontSize, ElementName=page}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Style="{StaticResource SubtitleTextBlockStyle}"
+                            Grid.Column="2"/>
+            </Grid>
+        </DataTemplate>
+
+    </Page.Resources>
+
+    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <TextBlock x:Name="TitleTextBlock"
+                   Text="Drones en Madrid"
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   Margin="24,10,0,24"/>
+        <CommandBar x:Name="MainCommandBar"
+                    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                    RelativePanel.AlignRightWithPanel="True"
+                    OverflowButtonVisibility="Collapsed"
+                    DefaultLabelPosition="Right">
+
+            <AppBarButton Icon="SelectAll"
+                                  Label="Todos"
+                          Click="{x:Bind selectAll}"/>
+
+            <AppBarButton Icon="ClearSelection"
+                                  Label="Ninguno"
+                          Click="{x:Bind deselectAll}"/>
+        </CommandBar>
+
+        <Grid   RelativePanel.AlignLeftWithPanel="True"
+                RelativePanel.AlignRightWithPanel="True"
+                RelativePanel.AlignBottomWithPanel="True"
+                RelativePanel.Below="TitleTextBlock">
+        <!--    RelativePanel alignment needed to fit grid below CommandBar      -->
+            
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+        <!--    Top-Left    -->
+            <Image Source="Assets/Madrid.png"
+                   Grid.Row="0"
+                   Grid.Column="0"
+                   Stretch="Fill"/>
+
+
+        <!--    Top-Right    -->
+
+            <ListView   x:Name="DroneList"
+                        ItemsSource="{x:Bind ListaDrones}"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        ItemTemplate="{StaticResource ListTemplate}"
+                        IsMultiSelectCheckBoxEnabled="True"
+                        SelectionMode="Multiple">
+                
+                
+            </ListView>
+
+
+            <!--    Bottom-Left    -->
+
+
+        <!--    Bottom-Right    -->
+
+
+        </Grid>
+
+    </RelativePanel>
+
+</Page>
