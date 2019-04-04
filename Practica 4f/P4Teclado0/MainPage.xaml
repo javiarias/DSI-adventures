@@ -80,14 +80,18 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-        <!--    Top-Left    -->
+            <!--    Top-Left    -->
             <Image Source="Assets/Madrid.png"
-                   Grid.Row="0"
-                   Grid.Column="0"
-                   Stretch="Fill"/>
+                       Stretch="Fill"
+                       Grid.Row="0"
+                       Grid.Column="0"/>
+            <Canvas    x:Name="Map"
+                       Grid.Row="0"
+                       Grid.Column="0">
+            </Canvas>
 
 
-        <!--    Top-Right    -->
+            <!--    Top-Right    -->
 
             <ListView   x:Name="DroneList"
                         ItemsSource="{x:Bind ListaDrones}"
@@ -95,16 +99,31 @@
                         Grid.Column="1"
                         ItemTemplate="{StaticResource ListTemplate}"
                         IsMultiSelectCheckBoxEnabled="True"
-                        SelectionMode="Multiple">
-                
-                
+                        SelectionMode="Multiple"
+                        SelectionChanged="DroneList_SelectionChanged"
+                        >
+
+
             </ListView>
 
 
             <!--    Bottom-Left    -->
+            <TextBlock   x:Name="DroneInfo"
+                         Text=""
+                         FontSize="{Binding FontSize, ElementName=page}"
+                         Style="{StaticResource SubtitleTextBlockStyle}"
+                         Grid.Row="1"
+                         Grid.Column="0"
+                         Margin="10,10,10,10"/>
+            
 
 
-        <!--    Bottom-Right    -->
+            <!--    Bottom-Right    -->
+            <Image  x:Name="DroneImg"
+                    Source=""
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Stretch="Fill"/>
 
 
         </Grid>

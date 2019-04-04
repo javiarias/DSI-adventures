@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Storage;
@@ -53,13 +54,55 @@ namespace P4Teclado
 
         private void selectAll()
         {
-
+            DroneList.SelectAll();
         }
 
         private void deselectAll()
         {
-
+            DroneList.SelectedItems.Clear();
         }
 
+        private void DroneList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            foreach(Dron d in e.RemovedItems)
+            {
+                foreach(ContentControl c in Map.Children)
+                {
+                    if (d.Img == c.Content)
+                    {
+                        Map.Children.Remove(c);
+                        c.Content = null;
+                        break;
+                    }
+                }
+            }
+
+            foreach(Dron d in e.AddedItems)
+            {
+                ContentControl c = new ContentControl();
+                c.Content = d.Img;
+                c.UseSystemFocusVisuals = true;
+                //c.PointerPressed;
+                //c.PointerReleased;
+                //c.
+                Map.Children.Add(c);
+                Map.Children.Last().SetValue(Canvas.LeftProperty, d.X);
+                Map.Children.Last().SetValue(Canvas.TopProperty, d.Y);
+            }
+
+
+            if (e.AddedItems.Count == 0 && DroneList.SelectedItems.Count == 0)
+            {
+                DroneInfo.Text = "";
+                DroneImg.Source = null;
+            }
+            else
+            {
+                Dron d = DroneList.SelectedItems.Last() as Dron;
+
+                DroneInfo.Text = "Id: " + d.Id + ", Nombre: " + d.Nombre + ", Estado: " + d.Estado + ", Coordenadas: (" + d.X + ", " + d.Y + ")" + "\n" + "Explicación: " + d.Explicacion;
+                DroneImg.Source = d.Img.Source;
+            }
+        }
     }
 }
