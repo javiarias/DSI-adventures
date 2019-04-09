@@ -137,8 +137,8 @@ namespace P4Teclado
                 Imagen = "Assets\\Samples\\13.jpg",
                 Explicacion = @"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer id facilisis lectus. Cras nec convallis ante, quis pulvinar tellus. Integer dictum accumsan pulvinar. Pellentesque eget enim sodales sapien vestibulum consequat. Maecenas eu sapien ac urna aliquam dictum. Nullam eget mattis metus. Donec pharetra, tellus in mattis tincidunt, magna ipsum gravida nibh, vitae lobortis ante odio vel quam.",
                 Estado = Dron.estados.Aterrizado,
-                X = 130,
-                Y = 130,
+                X = 230,
+                Y = 230,
              }
              
           };

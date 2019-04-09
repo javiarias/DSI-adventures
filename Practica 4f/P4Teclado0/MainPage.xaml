@@ -85,10 +85,15 @@
                        Stretch="Fill"
                        Grid.Row="0"
                        Grid.Column="0"/>
-            <Canvas    x:Name="Map"
-                       Grid.Row="0"
-                       Grid.Column="0">
-            </Canvas>
+                <!--    The Viewbox allows the Canvas (and its contents) to be resized along with the window    -->
+            <Viewbox    Stretch="Fill"
+                        Grid.Row="0"
+                        Grid.Column="0">
+                <Canvas x:Name="Map"
+                        Width="800"
+                        Height="400">
+                </Canvas>
+            </Viewbox>
 
 
             <!--    Top-Right    -->
