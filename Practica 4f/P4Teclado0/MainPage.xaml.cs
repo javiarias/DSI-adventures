@@ -82,13 +82,16 @@ namespace P4Teclado
                 ContentControl c = new ContentControl();
                 c.Content = d.Img;
                 c.UseSystemFocusVisuals = true;
-                c.PointerPressed += DroneClickPress;
+                c.PointerPressed += DroneClickPress;    //since the focusing/defocusing is handled elsewhere, PointerPressed only makes sure the object is positioned correctly when clicked
                 c.PointerReleased += DroneClickRelease;
                 c.PointerMoved += DroneClickMove;
-                c.KeyDown += DroneKeyMove;
+                c.KeyDown += DroneKeyEvents;
 
-                //just in case the pointer/mouse is dragged outside the canvas and then released, we can update the text
-                c.LostFocus += DroneLostFocus;
+                //both the text and image at the bottom, as well as the associated item in listaDrones, are updated whenever a drone loses or gains focus
+                //this is to avoid duplicating code and updating the text every single time the drone is moved, purely a design choice
+                //since GotFocus will always be raised after LostFocus (https://docs.microsoft.com/en-us/uwp/api/windows.ui.xaml.uielement.gotfocus), we can be sure the right text appears
+                c.LostFocus += DroneFocusUpdate;
+                c.GotFocus += DroneFocusUpdate;
 
                 //c.KeyDown = ;
                 Map.Children.Add(c);
@@ -133,63 +136,62 @@ namespace P4Teclado
                     c.SetValue(Canvas.TopProperty, 0);
                 else if(ptr.Position.Y > Map.Height - i.Height / 2)
                     c.SetValue(Canvas.TopProperty, Map.Height - i.Height);
-
-                foreach (Dron d in ListaDrones)
-                {
-                    if (d.Img == c.Content)
-                    {
-                        DroneInfo.Text = "Id: " + d.Id + ", Nombre: " + d.Nombre + ", Estado: " + d.Estado + ", Coordenadas: (" + d.X + ", " + d.Y + ")" + "\n" + "Explicación: " + d.Explicacion;
-                        DroneImg.Source = d.Img.Source;
-                        Map.Children.Move((uint)Map.Children.IndexOf(c), (uint)Map.Children.IndexOf(Map.Children.Last()));
-                        break;
-                    }
-                }
             }
         }
 
         private void DroneClickRelease(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            ContentControl c = sender as ContentControl;
-            foreach (Dron d in ListaDrones)
-            {
-                if (d.Img == c.Content)
-                {
-                    d.X = (int)Convert.ToDouble(c.GetValue(Canvas.LeftProperty).ToString());
-                    d.Y = (int)Convert.ToDouble(c.GetValue(Canvas.TopProperty).ToString());
-                    DroneInfo.Text = "Id: " + d.Id + ", Nombre: " + d.Nombre + ", Estado: " + d.Estado + ", Coordenadas: (" + d.X + ", " + d.Y + ")" + "\n" + "Explicación: " + d.Explicacion;
-                    DroneImg.Source = d.Img.Source;
-                    break;
-                }
-            }
+            //in case we need it later, empty for the moment
         }
 
-        private void DroneKeyMove(object sender, Windows.UI.Xaml.Input.KeyRoutedEventArgs e)
+        private void DroneKeyEvents(object sender, Windows.UI.Xaml.Input.KeyRoutedEventArgs e)
         {
             ContentControl c = sender as ContentControl;
+            int senderIndex = Map.Children.IndexOf(c); Image i = c.Content as Image;
 
             if (e.Key == Windows.System.VirtualKey.W)
             {
-                c.SetValue(Canvas.TopProperty, (double)c.GetValue(Canvas.TopProperty) - 5);
+                if ((double)c.GetValue(Canvas.TopProperty) > 5)
+                    c.SetValue(Canvas.TopProperty, (double)c.GetValue(Canvas.TopProperty) - 5);
+                else
+                    c.SetValue(Canvas.TopProperty, 0);
             }
             else if (e.Key == Windows.System.VirtualKey.A)
             {
-                c.SetValue(Canvas.LeftProperty, (double)c.GetValue(Canvas.LeftProperty) - 5);
+                if ((double)c.GetValue(Canvas.LeftProperty) > 5)
+                    c.SetValue(Canvas.LeftProperty, (double)c.GetValue(Canvas.LeftProperty) - 5);
+                else
+                    c.SetValue(Canvas.LeftProperty, 0);
             }
             else if (e.Key == Windows.System.VirtualKey.S)
             {
-                c.SetValue(Canvas.TopProperty, (double)c.GetValue(Canvas.TopProperty) + 5);
+                if ((double)c.GetValue(Canvas.TopProperty) < Map.Height - i.Height - 5)
+                    c.SetValue(Canvas.TopProperty, (double)c.GetValue(Canvas.TopProperty) + 5);
+                else
+                    c.SetValue(Canvas.TopProperty, Map.Height - i.Height);
             }
             else if (e.Key == Windows.System.VirtualKey.D)
             {
-                c.SetValue(Canvas.LeftProperty, (double)c.GetValue(Canvas.LeftProperty) + 5);
+                if ((double)c.GetValue(Canvas.LeftProperty) < Map.Width - i.Width - 5)
+                    c.SetValue(Canvas.LeftProperty, (double)c.GetValue(Canvas.LeftProperty) + 5);
+                else
+                    c.SetValue(Canvas.LeftProperty, Map.Width - i.Width);
             }
             else if (e.Key == Windows.System.VirtualKey.Left)
             {
-
+                if (senderIndex > 0)
+                {
+                    c = Map.Children[senderIndex - 1] as ContentControl;
+                    c.Focus(Windows.UI.Xaml.FocusState.Keyboard);
+                }
             }
             else if (e.Key == Windows.System.VirtualKey.Right)
             {
-
+                if (senderIndex < Map.Children.Count() - 1)
+                {
+                    c = Map.Children[senderIndex + 1] as ContentControl;
+                    c.Focus(Windows.UI.Xaml.FocusState.Keyboard);
+                }
             }
         }
 
@@ -208,10 +210,28 @@ namespace P4Teclado
                 }
             }
         }
-
-        private void DroneLostFocus(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void DroneFocusUpdate(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            DroneClickRelease(sender, null);
+            ContentControl c = sender as ContentControl;
+
+            foreach (Dron d in ListaDrones)
+            {
+                if (d.Img == c.Content)
+                {
+                    //for some reason, you can't turn getvalue directly into an int, you first have to cast it as a double
+                    d.X = (int)(double)c.GetValue(Canvas.LeftProperty);
+                    d.Y = (int)(double)c.GetValue(Canvas.TopProperty);
+                    DroneInfo.Text = "Id: " + d.Id + ", Nombre: " + d.Nombre + ", Estado: " + d.Estado + ", Coordenadas: (" + d.X + ", " + d.Y + ")" + "\n" + "Explicación: " + d.Explicacion;
+                    DroneImg.Source = d.Img.Source;
+
+                    if(c.FocusState != Windows.UI.Xaml.FocusState.Unfocused)
+                        c.SetValue(Canvas.ZIndexProperty, 1);
+                    else
+                        c.SetValue(Canvas.ZIndexProperty, 0);
+
+                    break;
+                }
+            }
         }
     }
 }
