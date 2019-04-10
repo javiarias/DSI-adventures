@@ -85,6 +85,7 @@ namespace P4Teclado
                 c.PointerPressed += DroneClickPress;
                 c.PointerReleased += DroneClickRelease;
                 c.PointerMoved += DroneClickMove;
+                c.KeyDown += DroneKeyMove;
 
                 //just in case the pointer/mouse is dragged outside the canvas and then released, we can update the text
                 c.LostFocus += DroneLostFocus;
@@ -115,7 +116,7 @@ namespace P4Teclado
             if (e.GetCurrentPoint(null).Properties.IsLeftButtonPressed)
             {
                 ContentControl c = sender as ContentControl;
-                c.Focus(Windows.UI.Xaml.FocusState.Programmatic);
+                c.Focus(Windows.UI.Xaml.FocusState.Pointer);
 
                 Image i = c.Content as Image;
                 Windows.UI.Input.PointerPoint ptr = e.GetCurrentPoint(Map);
@@ -164,14 +165,39 @@ namespace P4Teclado
 
         private void DroneKeyMove(object sender, Windows.UI.Xaml.Input.KeyRoutedEventArgs e)
         {
+            ContentControl c = sender as ContentControl;
 
+            if (e.Key == Windows.System.VirtualKey.W)
+            {
+                c.SetValue(Canvas.TopProperty, (double)c.GetValue(Canvas.TopProperty) - 5);
+            }
+            else if (e.Key == Windows.System.VirtualKey.A)
+            {
+                c.SetValue(Canvas.LeftProperty, (double)c.GetValue(Canvas.LeftProperty) - 5);
+            }
+            else if (e.Key == Windows.System.VirtualKey.S)
+            {
+                c.SetValue(Canvas.TopProperty, (double)c.GetValue(Canvas.TopProperty) + 5);
+            }
+            else if (e.Key == Windows.System.VirtualKey.D)
+            {
+                c.SetValue(Canvas.LeftProperty, (double)c.GetValue(Canvas.LeftProperty) + 5);
+            }
+            else if (e.Key == Windows.System.VirtualKey.Left)
+            {
+
+            }
+            else if (e.Key == Windows.System.VirtualKey.Right)
+            {
+
+            }
         }
 
         private void DroneClickMove(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
             ContentControl c = sender as ContentControl;
 
-            if (c.FocusState != Windows.UI.Xaml.FocusState.Unfocused)
+            if (c.FocusState == Windows.UI.Xaml.FocusState.Pointer)
             {
                 Windows.UI.Input.PointerPoint ptr = e.GetCurrentPoint(Map);
                 Image i = c.Content as Image;
