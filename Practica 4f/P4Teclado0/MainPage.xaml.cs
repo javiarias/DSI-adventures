@@ -15,6 +15,10 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using Windows.Gaming.Input;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Input;
+using Windows.System;
 
 // La plantilla de elemento Página en blanco está documentada en https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0xc0a
 
@@ -27,15 +31,82 @@ namespace P4Teclado
     {
 
         //Lista de Drones del UI      
-        public ObservableCollection<Dron> ListaDrones { get; } = new ObservableCollection<Dron>();
+        public ObservableCollection<Dron> ListaDrones { get; } = new ObservableCollection<Dron>(); private readonly object myLock = new object();
+        private List<Gamepad> myGamepads = new List<Gamepad>();
+        private Gamepad mainGamepad;
+
+        private void GetGamepads()
+        {
+            lock (myLock)
+            {
+                foreach (var gamepad in Gamepad.Gamepads)
+                {
+                    // Check if the gamepad is already in myGamepads; if it isn't, add it.
+                    bool gamepadInList = myGamepads.Contains(gamepad);
+
+                    if (!gamepadInList)
+                    {
+                        // This code assumes that you're interested in all gamepads.
+                        myGamepads.Add(gamepad);
+                    }
+                }
+            }
+        }
+
+        DispatcherTimer dispatcherTimer;
+        DateTimeOffset startTime;
+        DateTimeOffset lastTime;
+
+        public void DispatcherTimerSetup()
+        {
+            dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += TimerTick;
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 1);
+            startTime = DateTimeOffset.Now;
+            lastTime = startTime;
+            dispatcherTimer.Start();
+        }
 
         public MainPage()
         {
             this.InitializeComponent();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs eventArgs)
         {
+            GetGamepads();
+            Gamepad.GamepadAdded += (object sender, Gamepad e) =>
+            {
+                // Check if the just-added gamepad is already in myGamepads; if it isn't, add
+                // it.
+                lock (myLock)
+                {
+                    bool gamepadInList = myGamepads.Contains(e);
+
+                    if (!gamepadInList)
+                    {
+                        myGamepads.Add(e);
+                    }
+                }
+            };
+            Gamepad.GamepadRemoved += (object sender, Gamepad e) =>
+            {
+                lock (myLock)
+                {
+                    int indexRemoved = myGamepads.IndexOf(e);
+
+                    if (indexRemoved > -1)
+                    {
+                        if (mainGamepad == myGamepads[indexRemoved])
+                        {
+                            mainGamepad = null;
+                        }
+
+                        myGamepads.RemoveAt(indexRemoved);
+                    }
+                }
+            };
+
             // Contruye las listas y objetos que se necesiten 
             if (ListaDrones != null)
                 foreach (Dron item in DataDrones.GetAllDrones())
@@ -48,7 +119,9 @@ namespace P4Teclado
                     item.Img = img;
                 }
 
-            base.OnNavigatedTo(e);
+            DispatcherTimerSetup();
+
+            base.OnNavigatedTo(eventArgs);
         }
             
 
@@ -114,12 +187,12 @@ namespace P4Teclado
             }
         }
 
-        private void DroneClickPress(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
+        private void DroneClickPress(object sender, PointerRoutedEventArgs e)
         {
             if (e.GetCurrentPoint(null).Properties.IsLeftButtonPressed)
             {
                 ContentControl c = sender as ContentControl;
-                c.Focus(Windows.UI.Xaml.FocusState.Pointer);
+                c.Focus(FocusState.Pointer);
 
                 Image i = c.Content as Image;
                 Windows.UI.Input.PointerPoint ptr = e.GetCurrentPoint(Map);
@@ -139,67 +212,128 @@ namespace P4Teclado
             }
         }
 
-        private void DroneClickRelease(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
+        private void DroneClickRelease(object sender, PointerRoutedEventArgs e)
         {
             //in case we need it later, empty for the moment
         }
 
-        private void DroneKeyEvents(object sender, Windows.UI.Xaml.Input.KeyRoutedEventArgs e)
+        private void DroneKeyEvents(object sender, KeyRoutedEventArgs e)
         {
             ContentControl c = sender as ContentControl;
-            int senderIndex = Map.Children.IndexOf(c); Image i = c.Content as Image;
+            int senderIndex = Map.Children.IndexOf(c);
+            Image i = c.Content as Image;
 
-            if (e.Key == Windows.System.VirtualKey.W)
+        //  KEYBOARD CONTROLS
+
+            if (e.Key == VirtualKey.W)
             {
                 if ((double)c.GetValue(Canvas.TopProperty) > 5)
                     c.SetValue(Canvas.TopProperty, (double)c.GetValue(Canvas.TopProperty) - 5);
                 else
                     c.SetValue(Canvas.TopProperty, 0);
             }
-            else if (e.Key == Windows.System.VirtualKey.A)
-            {
-                if ((double)c.GetValue(Canvas.LeftProperty) > 5)
-                    c.SetValue(Canvas.LeftProperty, (double)c.GetValue(Canvas.LeftProperty) - 5);
-                else
-                    c.SetValue(Canvas.LeftProperty, 0);
-            }
-            else if (e.Key == Windows.System.VirtualKey.S)
-            {
-                if ((double)c.GetValue(Canvas.TopProperty) < Map.Height - i.Height - 5)
-                    c.SetValue(Canvas.TopProperty, (double)c.GetValue(Canvas.TopProperty) + 5);
-                else
-                    c.SetValue(Canvas.TopProperty, Map.Height - i.Height);
-            }
-            else if (e.Key == Windows.System.VirtualKey.D)
+            else if (e.Key == VirtualKey.D)
             {
                 if ((double)c.GetValue(Canvas.LeftProperty) < Map.Width - i.Width - 5)
                     c.SetValue(Canvas.LeftProperty, (double)c.GetValue(Canvas.LeftProperty) + 5);
                 else
                     c.SetValue(Canvas.LeftProperty, Map.Width - i.Width);
             }
-            else if (e.Key == Windows.System.VirtualKey.Left)
+            if (e.Key == VirtualKey.A)
+            {
+                if ((double)c.GetValue(Canvas.LeftProperty) > 5)
+                    c.SetValue(Canvas.LeftProperty, (double)c.GetValue(Canvas.LeftProperty) - 5);
+                else
+                    c.SetValue(Canvas.LeftProperty, 0);
+            }
+            else if (e.Key == VirtualKey.S)
+            {
+                if ((double)c.GetValue(Canvas.TopProperty) < Map.Height - i.Height - 5)
+                    c.SetValue(Canvas.TopProperty, (double)c.GetValue(Canvas.TopProperty) + 5);
+                else
+                    c.SetValue(Canvas.TopProperty, Map.Height - i.Height);
+            }
+            if (e.Key == VirtualKey.Left)
             {
                 if (senderIndex > 0)
                 {
                     c = Map.Children[senderIndex - 1] as ContentControl;
-                    c.Focus(Windows.UI.Xaml.FocusState.Keyboard);
+                    c.Focus(FocusState.Keyboard);
                 }
             }
-            else if (e.Key == Windows.System.VirtualKey.Right)
+            if (e.Key == VirtualKey.Right)
             {
                 if (senderIndex < Map.Children.Count() - 1)
                 {
                     c = Map.Children[senderIndex + 1] as ContentControl;
-                    c.Focus(Windows.UI.Xaml.FocusState.Keyboard);
+                    c.Focus(FocusState.Keyboard);
+                }
+            }
+
+            DroneFocusUpdate(sender, null);
+        }
+
+        void TimerTick(object sender, object e)
+        {
+            DateTimeOffset time = DateTimeOffset.Now;
+            lastTime = time;
+            //Time since last tick should be very very close to Interval
+
+
+            if (myGamepads.Count > 0)
+            {
+                Gamepad gamepad = myGamepads[0];
+                GamepadReading reading = gamepad.GetCurrentReading();
+
+                double rightStickX = reading.RightThumbstickX; // returns a value between -1.0 and +1.0
+                double rightStickY = reading.RightThumbstickY; // returns a value between -1.0 and +1.0
+
+                ContentControl c = null;
+                foreach (ContentControl cont in Map.Children)
+                {
+                    if (cont.FocusState == FocusState.Keyboard)
+                    {
+                        c = cont;
+                        break;
+                    }
+                }
+
+                if (c != null)
+                {
+                    Image i = c.Content as Image;
+                    double droneX = (double)c.GetValue(Canvas.LeftProperty);
+                    double droneY = (double)c.GetValue(Canvas.TopProperty);
+
+                    if (rightStickX > 0.3 || rightStickX < -0.3)
+                        droneX += rightStickX * 4;
+                    if (rightStickY > 0.3 || rightStickY < -0.3)
+                        droneY -= rightStickY * 4;  //y is inverted
+
+
+                    if (droneY < 0)
+                        c.SetValue(Canvas.TopProperty, 0);
+                    else if (droneY > Map.Height - i.Height)
+                        c.SetValue(Canvas.TopProperty, Map.Height - i.Height);
+                    else
+                        c.SetValue(Canvas.TopProperty, droneY);
+
+                    if (droneX < 0)
+                        c.SetValue(Canvas.LeftProperty, 0);
+                    else if (droneX > Map.Width - i.Width)
+                        c.SetValue(Canvas.LeftProperty, Map.Width - i.Width);
+                    else
+                        c.SetValue(Canvas.LeftProperty, droneX);
+
+                    DroneFocusUpdate(c, null);
                 }
             }
         }
 
-        private void DroneClickMove(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
+        private void DroneClickMove(object sender, PointerRoutedEventArgs e)
         {
             ContentControl c = sender as ContentControl;
 
-            if (c.FocusState == Windows.UI.Xaml.FocusState.Pointer)
+            if (c.FocusState == FocusState.Pointer)
             {
                 Windows.UI.Input.PointerPoint ptr = e.GetCurrentPoint(Map);
                 Image i = c.Content as Image;
@@ -207,10 +341,12 @@ namespace P4Teclado
                 {
                     c.SetValue(Canvas.LeftProperty, ptr.Position.X - i.Width / 2);
                     c.SetValue(Canvas.TopProperty, ptr.Position.Y - i.Height / 2);
+
+                    DroneFocusUpdate(sender, null);
                 }
             }
         }
-        private void DroneFocusUpdate(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void DroneFocusUpdate(object sender, RoutedEventArgs e)
         {
             ContentControl c = sender as ContentControl;
 
@@ -224,7 +360,7 @@ namespace P4Teclado
                     DroneInfo.Text = "Id: " + d.Id + ", Nombre: " + d.Nombre + ", Estado: " + d.Estado + ", Coordenadas: (" + d.X + ", " + d.Y + ")" + "\n" + "Explicación: " + d.Explicacion;
                     DroneImg.Source = d.Img.Source;
 
-                    if(c.FocusState != Windows.UI.Xaml.FocusState.Unfocused)
+                    if(c.FocusState != FocusState.Unfocused)
                         c.SetValue(Canvas.ZIndexProperty, 1);
                     else
                         c.SetValue(Canvas.ZIndexProperty, 0);
