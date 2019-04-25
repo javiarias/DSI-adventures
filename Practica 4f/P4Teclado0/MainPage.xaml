@@ -57,12 +57,22 @@
                     DefaultLabelPosition="Right">
 
             <AppBarButton Icon="SelectAll"
-                                  Label="Todos"
-                          Click="{x:Bind selectAll}"/>
+                          Label="Todos"
+                          Click="{x:Bind selectAll}"
+                          ToolTipService.ToolTip="Seleccionar todo (Ctrl+T)">
+                          <AppBarButton.KeyboardAccelerators>
+                            <KeyboardAccelerator Modifiers="Control" Key="T" />
+                          </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
 
             <AppBarButton Icon="ClearSelection"
-                                  Label="Ninguno"
-                          Click="{x:Bind deselectAll}"/>
+                          Label="Ninguno"
+                          Click="{x:Bind deselectAll}"
+                          ToolTipService.ToolTip="Deseleccionar todo (Ctrl+N)">
+                          <AppBarButton.KeyboardAccelerators>
+                              <KeyboardAccelerator Modifiers="Control" Key="N" />
+                          </AppBarButton.KeyboardAccelerators>
+            </AppBarButton>
         </CommandBar>
 
         <Grid   RelativePanel.AlignLeftWithPanel="True"
